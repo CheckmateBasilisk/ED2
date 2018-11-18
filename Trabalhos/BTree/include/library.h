@@ -4,22 +4,33 @@
 #include<stdio.h>
 
 typedef struct{
+    char title[50];
     char isbn[14];
-    //char author[50];
-    //char year[5];
+    //char isbn[16];//there's something weird at runtime. Some kind of optimization making IDXENTRY occupy more bytes than it should
+    char author[50];
+    char year[5];
 }BOOK;
 
 typedef struct{
-    BOOK book;
+    char isbn[16];
     int rrn;//offset in the main data file
-}ENTRY;
+}IDXENTRY;
 
+typedef struct{
+    FILE *mainFp;//main data file
+    FILE *idxFp;//index file
+    /*typedef struct{
+        //non-functional!!
+        //header to the DF. Precedes all the Entries
+    }DFHEADER;*/
+}LIBRARY;
 
-FILE *buildStartingLibrary();
-BOOK buildBook(char []);
-int appendDF(BOOK , FILE *);
-ENTRY readEntry(int , FILE *);
+LIBRARY buildStartingLibrary();
+void closeLibrary(LIBRARY *);
+BOOK buildBook(char [], char [], char [], char []);
 void printBook(BOOK );
-void printEntry(ENTRY );
+IDXENTRY buildIdxEntry(BOOK , int );
+void printIdxEntry(IDXENTRY );
+int addBook(LIBRARY *, BOOK );
 
 #endif

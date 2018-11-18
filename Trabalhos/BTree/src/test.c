@@ -6,19 +6,18 @@
 
 #define ENTER 10
 
-int main(int argc, char *argv[]){
-    FILE *mainDF = buildStartingLibrary();
-    
-    appendDF(buildBook("A234567890123"), mainDF);
-    //appendDF(buildBook("B234567890123"), mainDF);
-    //appendDF(buildBook("C234567890123"), mainDF);
-    
-    /*for(int i=0;i<3;i++){
-        printEntry(readEntry(i,mainDF));
-    }*/    
 
-    ENTRY entry;
-    readFromFile(&entry,sizeof(ENTRY),0,mainDF);
-    printEntry(entry);
-    return 0;
+int main(int argc, char *argv[]){
+    LIBRARY lib = buildStartingLibrary();
+
+
+    BOOK book = buildBook("The Great Gatsby","A234567890123","Scott Fitzgerald", "1922");
+    addBook(&lib, book);
+    book = buildBook("Venus In Furs","B234567890123","Leopold von Sacher-Masoch", "1870");
+    addBook(&lib, book);
+    book = buildBook("Interview with the Vampire","C234567890123","Anne Rice", "1968");
+    addBook(&lib, book);
+
+    closeLibrary(&lib);
+
 }

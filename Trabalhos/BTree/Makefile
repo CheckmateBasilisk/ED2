@@ -5,7 +5,7 @@ all:
 	gcc -o ./build/main ./src/main.c $(INCLUDE) -I$(INCLUDEDIR) -Wall
 test:
 	gcc -o ./build/test ./src/test.c $(INCLUDE) -I$(INCLUDEDIR) -Wall
-runTest:
+runtest:
 	./build/test
 run:
 	./build/main

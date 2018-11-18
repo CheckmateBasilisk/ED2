@@ -5,10 +5,11 @@
 
 #define ENTER 10
 
-int main(int argc, char *argv[]){
-    char *line = readLine(stdin, ENTER);
+void printMenu(){
+    printf("a) ");
 
-    printf("%s\n", line);
-    free(line);
-    return 0;
+}
+
+int main(int argc, char *argv[]){
+
 }
