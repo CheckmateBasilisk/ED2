@@ -29,16 +29,17 @@ ATTENTION! this library is quite spartan. It will not deal with wrong input or w
 //if something wrong happens, will warn you, abort and return the current state of lib
 LIBRARY buildStartingLibrary(){
     LIBRARY lib;
-    lib.mainFp = fopen(DFfilename, "w");
+    lib.mainFp = fopen(DFfilename, "w+");
     if(lib.mainFp == NULL){
         printf("ERROR CREATING STARTING MAIN DATA FILE\n");
         return lib;
     }
-    lib.idxFp = fopen(IDXfilename, "w");
+    lib.idxFp = fopen(IDXfilename, "w+");
     if(lib.idxFp == NULL){
         printf("ERROR CREATING STARTING INDEX FILE\n");
         return lib;
     }
+    lib.bookCount = 0;
     
     return lib;
 }
@@ -86,20 +87,13 @@ void printIdxEntry(IDXENTRY idxentry){
     return;
 }
 
-//reads from MainDF the rrn-th book and returns it
-BOOK readBook(int rrn, FILE *mainDF){
-    BOOK book;
-    if(readFromFile(&book, sizeof(BOOK),rrn,mainDF) <= 0) printf("ERROR READING BOOK FROM MAIN DF\n");
-    
-    return book; //WILL WARN U, BUT WILL RETURN SHIT if the read failed!
-}
-
 //currently it just appends the idxEntry. Not useful at all
+//not available in library.h :)
 int addIdxEntry(IDXENTRY idxEntry, LIBRARY *lib){
 
     fseek(lib->mainFp,0,SEEK_END);
     if (fappend(&idxEntry, sizeof(IDXENTRY),1,lib->idxFp) <= 0){//if nothing was written (0) or an error occured (-1)
-        printf("ERROR ADDING BOOK TO INDEX DATA FILE");
+        printf("ERROR ADDING INDEX ENTRY TO INDEX DATA FILE");
     }
     
 
@@ -120,6 +114,62 @@ int addBook(LIBRARY *lib, BOOK book){
         printf("ERROR ADDING BOOK TO MAIN DATA FILE");
     }
     addIdxEntry(buildIdxEntry(book, rrn), lib);//adds the idxentry to indexfile
+    lib->bookCount++;
     
     return 0;
+}
+
+BOOK readBookFromDF(LIBRARY *lib,int rrn){//reads the rrn-th book in the main data file        
+    BOOK book;
+    
+    rewind(lib->mainFp);
+    fseek(lib->mainFp, sizeof(BOOK)*rrn, SEEK_SET);
+    if(fread(&book, sizeof(BOOK), 1, lib->mainFp) <= 0) printf("ERROR READING BOOK FROM MAIN DF\n");//read one entry
+    //if(readFromFile(&book, sizeof(BOOK),rrn,lib->mainFp) <= 0) printf("ERROR READING BOOK FROM MAIN DF\n");//read one entry
+    
+    return book;
+}
+
+IDXENTRY readIdxEntryFromIDX(LIBRARY *lib, int rrn){//reads the n-th entry in the index file
+    IDXENTRY idxEntry;
+    
+    rewind(lib->idxFp);
+    fseek(lib->idxFp, sizeof(IDXENTRY)*rrn, SEEK_SET);
+    if(fread(&idxEntry, sizeof(IDXENTRY), 1, lib->idxFp) <= 0) printf("ERROR READING INDEX ENTRY FROM INDEX FILE\n");//read one entry
+    //if(readFromFile(&idxEntry, sizeof(IDXENTRY),rrn,lib->idxFp) <= 0) printf("ERROR READING BOOK FROM MAIN DF\n");//read one entry
+    
+    return idxEntry;
+}
+
+//searches the index file and returns the rnn of an entry in the main data file with matching isbn
+//returns the rrn of the searched book in the main data file
+//returns -1 if the queried key was not found
+int searchBook(LIBRARY *lib, char isbn[]){
+    IDXENTRY idxEntry;
+
+//SEARCH METHOD IN HERE!!!
+
+    //PATHETIC SEQUENCIAL SEARCH
+//shit's going down here
+//the loop does not stop...
+    for(int counter=0 ; counter<lib->bookCount ; counter++){//while EOF not found
+        idxEntry = readIdxEntryFromIDX(lib,counter);
+        if(!strcmp(idxEntry.isbn, isbn)) return idxEntry.rrn;//no difference btween current index entry and queried key
+    }
+
+//SEARCH METHOD!!!
+
+    return -1;//not found 
+}
+
+//queries the index for a book with matching key and acesses the main data file and returns that book 
+BOOK queryBook(LIBRARY *lib, char isbn[]){
+    BOOK book;
+
+    int rrn; 
+    rrn = searchBook(lib, isbn);
+    if(rrn == -1) printf("BOOK NOT FOUND!\n");
+    book = readBookFromDF(lib, rrn);//reads the rrn-th book in the main data file        
+
+    return book;
 }

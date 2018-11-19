@@ -18,6 +18,22 @@ int main(int argc, char *argv[]){
     book = buildBook("Interview with the Vampire","C234567890123","Anne Rice", "1968");
     addBook(&lib, book);
 
+    /*
+    IDXENTRY idxEntry;
+    for(int i=0;i<lib.bookCount;i++){
+        book = readBookFromDF(&lib, i);
+        idxEntry = readIdxEntryFromIDX(&lib, i);
+        printBook(book);
+        printIdxEntry(idxEntry);
+    }
+    */
+
+    /*
+    book = queryBook(&lib,"B234567890123");
+    printBook(book);
+    */
+
     closeLibrary(&lib);
 
+    return 0;
 }

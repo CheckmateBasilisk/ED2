@@ -1,4 +1,4 @@
-#ifndef _LIBRARY_H_
+    #ifndef _LIBRARY_H_
 #define _LIBRARY_H_
 
 #include<stdio.h>
@@ -19,6 +19,7 @@ typedef struct{
 typedef struct{
     FILE *mainFp;//main data file
     FILE *idxFp;//index file
+    int bookCount;
     /*typedef struct{
         //non-functional!!
         //header to the DF. Precedes all the Entries
@@ -32,5 +33,9 @@ void printBook(BOOK );
 IDXENTRY buildIdxEntry(BOOK , int );
 void printIdxEntry(IDXENTRY );
 int addBook(LIBRARY *, BOOK );
+BOOK readBookFromDF(LIBRARY *,int );
+IDXENTRY readIdxEntryFromIDX(LIBRARY *, int );
+int searchBook(LIBRARY *, char []);
+BOOK queryBook(LIBRARY *, char []);
 
 #endif
