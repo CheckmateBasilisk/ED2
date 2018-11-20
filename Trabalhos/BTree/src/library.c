@@ -91,10 +91,12 @@ void printIdxEntry(IDXENTRY idxentry){
 //not available in library.h :)
 int addIdxEntry(IDXENTRY idxEntry, LIBRARY *lib){
 
+//INDEXING METHOD!!!
     fseek(lib->mainFp,0,SEEK_END);
     if (fappend(&idxEntry, sizeof(IDXENTRY),1,lib->idxFp) <= 0){//if nothing was written (0) or an error occured (-1)
         printf("ERROR ADDING INDEX ENTRY TO INDEX DATA FILE");
     }
+//INDEXING METHOD!!!
     
 
     return 0;
@@ -113,6 +115,7 @@ int addBook(LIBRARY *lib, BOOK book){
     if (fappend(&book, sizeof(BOOK),1,lib->mainFp) <= 0){//if nothing was written (0) or an error occured (-1)
         printf("ERROR ADDING BOOK TO MAIN DATA FILE");
     }
+
     addIdxEntry(buildIdxEntry(book, rrn), lib);//adds the idxentry to indexfile
     lib->bookCount++;
     

@@ -28,12 +28,11 @@ int main(int argc, char *argv[]){
     }
     */
 
-    /*
     book = queryBook(&lib,"B234567890123");
     printBook(book);
-    */
 
     closeLibrary(&lib);
 
     return 0;
+
 }
