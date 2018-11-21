@@ -133,7 +133,7 @@ BOOK readBookFromDF(LIBRARY *lib,int rrn){//reads the rrn-th book in the main da
     return book;
 }
 
-IDXENTRY readIdxEntryFromIDX(LIBRARY *lib, int rrn){//reads the n-th entry in the index file
+IDXENTRY readIdxEntryFromIDX(LIBRARY *lib, int rrn){//reads the n-th entry in the index file. Will not care about the internal organization of the idxFile. SHould be avoided!!!
     IDXENTRY idxEntry;
     
     rewind(lib->idxFp);
@@ -152,9 +152,7 @@ int searchBook(LIBRARY *lib, char isbn[]){
 
 //SEARCH METHOD IN HERE!!!
 
-    //PATHETIC SEQUENCIAL SEARCH
-//shit's going down here
-//the loop does not stop...
+    //sequential search
     for(int counter=0 ; counter<lib->bookCount ; counter++){//while EOF not found
         idxEntry = readIdxEntryFromIDX(lib,counter);
         if(!strcmp(idxEntry.isbn, isbn)) return idxEntry.rrn;//no difference btween current index entry and queried key
@@ -175,4 +173,17 @@ BOOK queryBook(LIBRARY *lib, char isbn[]){
     book = readBookFromDF(lib, rrn);//reads the rrn-th book in the main data file        
 
     return book;
+}
+
+//prints all books in order
+void printAllBooks(LIBRARY *lib){
+
+    //ACESS METHOD!
+    BOOK book;
+    for(int i=0;i<lib->bookCount;i++){
+        book = readBookFromDF(lib, i);
+        printBook(book);
+    }
+    //ACESS METHOD!
+
 }

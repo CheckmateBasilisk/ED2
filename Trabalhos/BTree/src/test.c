@@ -27,9 +27,12 @@ int main(int argc, char *argv[]){
         printIdxEntry(idxEntry);
     }
     */
+    printAllBooks(&lib);
 
+    /*
     book = queryBook(&lib,"B234567890123");
     printBook(book);
+    */
 
     closeLibrary(&lib);
 
