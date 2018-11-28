@@ -1,4 +1,4 @@
-INCLUDE = ./src/utils.c ./src/files.c ./src/library.c
+INCLUDE = ./src/utils.c ./src/files.c ./src/library.c ./src/bTree.c
 INCLUDEDIR = ./include
 
 all:

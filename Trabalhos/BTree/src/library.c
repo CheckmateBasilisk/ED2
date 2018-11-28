@@ -4,6 +4,7 @@
 #include<files.h>
 #include<utils.h>
 #include<library.h>//to recognize the types defined 
+#include<bTree.h>
 
 /*
 The library system is divided in two files:
@@ -87,17 +88,12 @@ void printIdxEntry(IDXENTRY idxentry){
     return;
 }
 
-//currently it just appends the idxEntry. Not useful at all
-//not available in library.h :)
+//adds idxEntry into the index file approprately, calling the functions in the extra library
 int addIdxEntry(IDXENTRY idxEntry, LIBRARY *lib){
 
 //INDEXING METHOD!!!
-    fseek(lib->mainFp,0,SEEK_END);
-    if (fappend(&idxEntry, sizeof(IDXENTRY),1,lib->idxFp) <= 0){//if nothing was written (0) or an error occured (-1)
-        printf("ERROR ADDING INDEX ENTRY TO INDEX DATA FILE");
-    }
+    addIdxEntry_Btree(lib, idxEntry);//adds idxEntry to the indexFile
 //INDEXING METHOD!!!
-    
 
     return 0;
 }
@@ -133,7 +129,8 @@ BOOK readBookFromDF(LIBRARY *lib,int rrn){//reads the rrn-th book in the main da
     return book;
 }
 
-IDXENTRY readIdxEntryFromIDX(LIBRARY *lib, int rrn){//reads the n-th entry in the index file. Will not care about the internal organization of the idxFile. SHould be avoided!!!
+//reads the n-th entry in the index file. Will not care about the internal organization of the idxFile. SHould be avoided at all costs!!!!
+IDXENTRY readIdxEntryFromIDX(LIBRARY *lib, int rrn){
     IDXENTRY idxEntry;
     
     rewind(lib->idxFp);
@@ -148,26 +145,18 @@ IDXENTRY readIdxEntryFromIDX(LIBRARY *lib, int rrn){//reads the n-th entry in th
 //returns the rrn of the searched book in the main data file
 //returns -1 if the queried key was not found
 int searchBook(LIBRARY *lib, char isbn[]){
-    IDXENTRY idxEntry;
 
 //SEARCH METHOD IN HERE!!!
-
-    //sequential search
-    for(int counter=0 ; counter<lib->bookCount ; counter++){//while EOF not found
-        idxEntry = readIdxEntryFromIDX(lib,counter);
-        if(!strcmp(idxEntry.isbn, isbn)) return idxEntry.rrn;//no difference btween current index entry and queried key
-    }
-
+    return searchEntry_Btree(lib, isbn);
 //SEARCH METHOD!!!
 
-    return -1;//not found 
 }
 
 //queries the index for a book with matching key and acesses the main data file and returns that book 
 BOOK queryBook(LIBRARY *lib, char isbn[]){
+    int rrn; 
     BOOK book;
 
-    int rrn; 
     rrn = searchBook(lib, isbn);
     if(rrn == -1) printf("BOOK NOT FOUND!\n");
     book = readBookFromDF(lib, rrn);//reads the rrn-th book in the main data file        
@@ -179,11 +168,8 @@ BOOK queryBook(LIBRARY *lib, char isbn[]){
 void printAllBooks(LIBRARY *lib){
 
     //ACESS METHOD!
-    BOOK book;
-    for(int i=0;i<lib->bookCount;i++){
-        book = readBookFromDF(lib, i);
-        printBook(book);
-    }
+    printAllBooks_Btree(lib);
     //ACESS METHOD!
 
+    return;
 }

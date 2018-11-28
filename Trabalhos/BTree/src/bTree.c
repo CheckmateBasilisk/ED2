@@ -3,6 +3,7 @@
 #include<string.h>
 #include<math.h>
 #include<library.h>//grants acess to structs LIBRARY, ENTRY, BOOK
+#include<files.h>
 
 
 #define BTREEORDER 4
@@ -14,6 +15,12 @@ typedef struct{
     int child[MAXCHILDREN];//array of "record pointers" to the rrn of the children in the Index File
     IDXENTRY key[MAXKEYS];//array of keys
 }BTPAGE;
+
+
+//IMPLEMENTING A B TREE
+
+
+//IMPLEMENTING A B TREE
 
 /*
 GOAL:
@@ -37,7 +44,38 @@ int searchBook(LIBRARY *lib, char isbn[]);
 //prints the B-Tree in-order
 void printAllBooks(LIBRARY *lib);
     calls as printAllBooks_Btree(LIBRARY *lib);
-
-
 */
+
+void addIdxEntry_Btree(LIBRARY *lib, IDXENTRY idxEntry){
+    fseek(lib->mainFp,0,SEEK_END);
+    if (fappend(&idxEntry, sizeof(IDXENTRY),1,lib->idxFp) <= 0){//if nothing was written (0) or an error occured (-1)
+        printf("ERROR ADDING INDEX ENTRY TO INDEX DATA FILE");
+    }
+
+    return;
+}
+
+//searches the index approprately, returning the rrn of the Entry in the main data file with the corresponding isbn
+//returns -1 if not found
+int searchEntry_Btree(LIBRARY *lib, char isbn[]){
+    IDXENTRY idxEntry;
+
+    //sequential search
+    for(int counter=0 ; counter<lib->bookCount ; counter++){//while EOF not found
+        idxEntry = readIdxEntryFromIDX(lib,counter);
+        if(!strcmp(idxEntry.isbn, isbn)) return idxEntry.rrn;//no difference btween current index entry and queried key
+    }
+
+    return -1;//not found 
+}
+
+void printAllBooks_Btree(LIBRARY *lib){
+    BOOK book;
+    for(int i=0;i<lib->bookCount;i++){
+        book = readBookFromDF(lib, i);
+        printBook(book);
+    }
+
+    return;
+}
 
