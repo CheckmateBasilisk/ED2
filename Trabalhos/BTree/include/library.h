@@ -21,14 +21,16 @@ typedef struct{
 typedef struct{
     FILE *mainFp;//main data file
     FILE *idxFp;//index file
+    FILE *libConfigFp;//config file, used to retrieve previous lib state
     int bookCount;
-    /*typedef struct{
-        //non-functional!!
-        //header to the DF. Precedes all the Entries
-    }DFHEADER;*/
+    //IMPLEMENTATION-SPECIFIC ADDITIONAL FIELDS!
+    int btreeRootRRN;//an rrn to the root-page in the indexFile
+    //IMPLEMENTATION-SPECIFIC ADDITIONAL FIELDS!
+    
 }LIBRARY;
 
 LIBRARY buildStartingLibrary();
+LIBRARY openLibrary();
 void closeLibrary(LIBRARY *);
 BOOK buildBook(char [], char [], char [], char []);
 void printBook(BOOK );

@@ -8,7 +8,8 @@
 
 
 int main(int argc, char *argv[]){
-    LIBRARY lib = buildStartingLibrary();
+    //LIBRARY lib = buildStartingLibrary();
+    LIBRARY lib = openLibrary();
 
 
     printf("Adding books to  Library\n");
@@ -49,6 +50,7 @@ int main(int argc, char *argv[]){
     printBook(book);
     */
 
+    printf("\nlast state of lib:\nbookCount: %d\nindexRoot rrn: %d\n", lib.bookCount, lib.btreeRootRRN);
     closeLibrary(&lib);
 
     return 0;

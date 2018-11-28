@@ -7,16 +7,20 @@
 #include<bTree.h>
 
 /*
-The library system is divided in two files:
+The library system is divided in three files:
     * The Main Data File: that contains all entries in insertion order.
         DF will be abreviation of DataFile
     * the BTree Index File: which contains references in rrn to each entry in the library, organized in a B-Tree
+    * the LibConfig File: which contains the last state the lib struct had in a previous run. Will contain critical info, such as entryCount and specific implementation data, such as the root of a Btree used to order the indexEnties
 
 Each entry in the Main Data File has a struct BOOK and additional fields to organize stuff. It is represented by the struct ENTRY
 
 Each entry in the Index File has a copy of the isbn of the book it points and the rrn of that book in the Main Data File. It is represented by a struct IDXENTRY
 
-The whole library is represented by the struct LIBRARY, which has filepointers to the main data file and index file
+The only content in the LibConfig File is the previous state of the lib struct. Nothing more. Saving the current state is as easy as dumping it into it, as when the lib is initialized (through new files or reading old ones) the libConfig is wiped.
+
+The whole library is represented by the struct LIBRARY, which has filepointers to the main data file and index file, as well as a count of the number of entries (bookCount) and the following implementation-specific fields:
+    - int BtreeRoot: the rrn of the BtreePage of the root-page
 
 ATTENTION! this library is quite spartan. It will not deal with wrong input or weird edge cases!
 */
@@ -24,30 +28,94 @@ ATTENTION! this library is quite spartan. It will not deal with wrong input or w
 
 
 //innitializes the library with the filepointers to the main data file and index files
+//also creates a libConfig file, that keeps the data from a previous library
 //returns the lib
 #define DFfilename "library.dat"
 #define IDXfilename "index.dat"
+#define LIBCONFIGfilename "libConfig.dat"
 //if something wrong happens, will warn you, abort and return the current state of lib
 LIBRARY buildStartingLibrary(){
     LIBRARY lib;
+    printf("starting new Library\n");
     lib.mainFp = fopen(DFfilename, "w+");
     if(lib.mainFp == NULL){
         printf("ERROR CREATING STARTING MAIN DATA FILE\n");
         return lib;
     }
+    printf("\tcreating main data file...\n");
     lib.idxFp = fopen(IDXfilename, "w+");
     if(lib.idxFp == NULL){
         printf("ERROR CREATING STARTING INDEX FILE\n");
         return lib;
     }
+    printf("\tcreating index file...\n");
+    lib.libConfigFp= fopen(LIBCONFIGfilename, "w+");
+    if(lib.idxFp == NULL){
+        printf("ERROR CREATING LIBCONFIG FILE\n");
+        return lib;
+    }
+    printf("\tcreating libconfig file...\n");
     lib.bookCount = 0;
+
+    //IMPLEMENTATION-SPECIFIC INITIALIZATION
+    buildStartingLibrary_Btree(&lib);
+    //IMPLEMENTATION-SPECIFIC INITIALIZATION
     
+    return lib;
+}
+
+//tries to open main data file and indexFile
+//if either fails, 
+LIBRARY openLibrary(){
+    LIBRARY lib;
+
+    FILE *aux = fopen(LIBCONFIGfilename,"r+");
+    if(aux == NULL){
+        printf("ERROR OPENING STARTING LIBCONFIG FILE\n");
+        printf("\tINITIALIZING NEW LIBRARY FILES\n");
+        return buildStartingLibrary();
+    }
+    printf("restoring previous libstate...\n");
+    fread(&lib, sizeof(LIBRARY), 1, aux);
+    fclose(aux);
+    lib.libConfigFp = fopen(LIBCONFIGfilename ,"w+");
+    //guarantees the pointer points to the right file after being overwritten by the content of that same file. confusing...
+    //also creates a new libConfigFile to store the state of the current lib when the used is finished with it
+
+    lib.mainFp = fopen(DFfilename, "r+");
+    if(lib.mainFp == NULL){
+        printf("ERROR OPENING STARTING MAIN DATA FILE\n");
+        printf("\tINITIALIZING NEW LIBRARY FILES\n");
+        fclose(lib.libConfigFp);//closes the libConfigFP, preparing lib to start anew
+        return buildStartingLibrary();
+    }
+    printf("\tmainFile opened sucessfully\n");
+    lib.idxFp = fopen(IDXfilename, "r+");
+    if(lib.idxFp == NULL){
+        printf("ERROR OPENING STARTING INDEX FILE\n");
+        printf("\tINITIALIZING NEW LIBRARY FILES\n");
+        fclose(lib.libConfigFp);//closes the libConfigFP, preparing lib to start anew
+        fclose(lib.mainFp);//closes the mainFp, preparing lib to start anew
+        return buildStartingLibrary();
+    }
+    printf("\tindexFile opened sucessfully\n");
+    
+    //IMPLEMENTATION-SPECIFIC INITIALIZATION
+    //none needed for Btree, as the root is alredy in the LibConfig file
+    //IMPLEMENTATION-SPECIFIC INITIALIZATION
+
     return lib;
 }
 
 void closeLibrary(LIBRARY *lib){
     fclose(lib->mainFp);
     fclose(lib->idxFp);
+    //dumps into libconfig the laststate of lib
+    lib->mainFp = NULL;
+    lib->idxFp = NULL;
+    fseek(lib->libConfigFp, 0, SEEK_SET);
+    fwrite(lib, sizeof(LIBRARY), 1, lib->libConfigFp);//dumps into libconfigFile the current state of lib, which should be empty
+    
     return;
 }
 

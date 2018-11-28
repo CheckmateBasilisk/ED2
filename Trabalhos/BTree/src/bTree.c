@@ -16,8 +16,8 @@ typedef struct{
     IDXENTRY key[MAXKEYS];//array of keys
 }BTPAGE;
 
-
 //IMPLEMENTING A B TREE
+
 
 
 //IMPLEMENTING A B TREE
@@ -30,6 +30,10 @@ make a layer between the library.c and the files, implementing a b-tree
 
 INPUT 
 the following functions in the library.c will call the functions here
+
+//implementation-specific libInitialization
+LIBRARY buildStartingLibrary();
+    calls as buildStartingLibrary_Btree(&lib);
 
 //not available in the library.h
 int addIdxEntry(IDXENTRY idxEntry, LIBRARY *lib);
@@ -45,6 +49,11 @@ int searchBook(LIBRARY *lib, char isbn[]);
 void printAllBooks(LIBRARY *lib);
     calls as printAllBooks_Btree(LIBRARY *lib);
 */
+
+void buildStartingLibrary_Btree(LIBRARY *lib){
+    lib->btreeRootRRN = -1; //descrbed in library.h
+    return;
+}
 
 void addIdxEntry_Btree(LIBRARY *lib, IDXENTRY idxEntry){
     fseek(lib->mainFp,0,SEEK_END);
