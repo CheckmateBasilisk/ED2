@@ -12,11 +12,48 @@
 #define MAXKEYS BTREEORDER-1
 #define MINKEYS 
 typedef struct{
+    int parent;//rrn of the parent page
     int child[MAXCHILDREN];//array of "record pointers" to the rrn of the children in the Index File
     IDXENTRY key[MAXKEYS];//array of keys
 }BTPAGE;
 
 //IMPLEMENTING A B TREE
+
+//creates a new page, empty
+BTPAGE createPage(){
+    BTPAGE page;
+    memset(&page, '\0', sizeof(BTPAGE));
+    return page;
+}
+
+
+void addIdxEntry_Btree(LIBRARY *lib, IDXENTRY idxEntry){
+    if(lib->btreeRootRRN == -1){//no nodes yet. Add root!
+        BTPAGE newRoot = createPage();
+        newRoot.child[0] = -1;
+        newRoot.key[0] = idxEntry;
+        newRoot.child[1] = -1;
+        lib->btreeRootRRN = (ftell(lib->idxFp)+1)/sizeof(BTPAGE);//rrn of root is 0
+        fwrite(&newRoot, sizeof(BTPAGE), 1, lib->idxFp);
+
+        printf("Successfully added Key (isbn): %s \n", newRoot.key[0].isbn);
+        return;
+    }
+
+    //find appropriate page
+
+    //see if fits
+        //if fits, add neatly
+        //if doesn't
+            //virtual add
+            //split
+            //promote middle
+                //recursively add above
+    
+    //done
+    
+
+}
 
 
 
@@ -55,6 +92,7 @@ void buildStartingLibrary_Btree(LIBRARY *lib){
     return;
 }
 
+/*
 void addIdxEntry_Btree(LIBRARY *lib, IDXENTRY idxEntry){
     fseek(lib->mainFp,0,SEEK_END);
     if (fappend(&idxEntry, sizeof(IDXENTRY),1,lib->idxFp) <= 0){//if nothing was written (0) or an error occured (-1)
@@ -63,6 +101,7 @@ void addIdxEntry_Btree(LIBRARY *lib, IDXENTRY idxEntry){
 
     return;
 }
+*/
 
 //searches the index approprately, returning the rrn of the Entry in the main data file with the corresponding isbn
 //returns -1 if not found
