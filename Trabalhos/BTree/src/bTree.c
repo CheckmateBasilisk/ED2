@@ -4,18 +4,8 @@
 #include<math.h>
 #include<library.h>//grants acess to structs LIBRARY, ENTRY, BOOK
 #include<files.h>
+#include<bTree.h>
 
-
-#define BTREEORDER 4
-#define MAXCHILDREN BTREEORDER
-#define MINXHILDREN ceil(BTREEORDER/2)
-#define MAXKEYS BTREEORDER-1
-#define MINKEYS 
-typedef struct{
-    int parent;//rrn of the parent page
-    int child[MAXCHILDREN];//array of "record pointers" to the rrn of the children in the Index File
-    IDXENTRY key[MAXKEYS];//array of keys
-}BTPAGE;
 
 //IMPLEMENTING A B TREE
 
@@ -26,6 +16,40 @@ BTPAGE createPage(){
     return page;
 }
 
+#define EMPTYISBN "\0"
+int findPage_step(LIBRARY *lib, int rrn, char isbn[]){
+    int i;
+    BTPAGE page;
+    if(rrn < 0) return -1;//??
+    fread(&page, sizeof(IDXENTRY), 1, lib->idxFp);
+    //find which page between children:
+        //hasnt reached max
+        //there's still children, given rightmost are certain EMTPYISBN
+        //the current key is smaller than isbn (strcmp<0)
+    for(i=0; i<MAXKEYS && strcmp(page.key[i].isbn,EMPTYISBN) && strcmp(page.key[i].isbn, isbn) < 0 ; i++);
+        //remember that page.key is an IDXENTRY, with char[] field
+
+    if(i==MAXCHILDREN && page.child[i] != -1) return findPage_step(lib, page.child[i], isbn);//rightmost child, if it exists
+    if(page.child[i] != -1) return findPage_step(lib, page.child[i], isbn);//left child of the first key>isbn
+    return rrn;//last case & stopping point
+}
+
+//finds the page that contains the entry with the isbn
+//returns the rrn of that page in the IdxFile
+//returns -1 ifnot found
+int findPage(LIBRARY *lib, char isbn[]){
+    return findPage_step(lib, lib->btreeRootRRN, isbn);
+}
+
+//reads the rrn-th page in the idx file
+//returns the read page
+BTPAGE readPage(LIBRARY *lib, int rrn){
+    BTPAGE page;
+    fseek(lib->idxFp,rrn*sizeof(BTPAGE),SEEK_SET);
+    fread(&page, sizeof(BTPAGE),1,lib->idxFp);
+
+    return page;
+}
 
 void addIdxEntry_Btree(LIBRARY *lib, IDXENTRY idxEntry){
     if(lib->btreeRootRRN == -1){//no nodes yet. Add root!
@@ -41,6 +65,10 @@ void addIdxEntry_Btree(LIBRARY *lib, IDXENTRY idxEntry){
     }
 
     //find appropriate page
+    BTPAGE page;
+    printf("W1!\n");
+    page = readPage(lib,findPage(lib, idxEntry.isbn));
+    printf("W2!\n");
 
     //see if fits
         //if fits, add neatly
@@ -52,11 +80,27 @@ void addIdxEntry_Btree(LIBRARY *lib, IDXENTRY idxEntry){
     
     //done
     
-
+    return;
 }
 
+void printPage(BTPAGE page){
+    int i;
+    printf("==========================\n");
+    printf("PARENT: %d\n", page.parent);
 
+    for(i=0;i<MAXKEYS;i++){
+        printf("--------------------------\n");
+        printf("CHILD[%d]: %d\n", i, page.child[i]);
+        printf("--------------------------\n");
+        printIdxEntry(page.key[i]);
+    }
+    printf("--------------------------\n");
+    printf("CHILD[%d]: %d\n", i, page.child[i]);
 
+    printf("==========================\n");
+    return;
+
+}
 //IMPLEMENTING A B TREE
 
 /*

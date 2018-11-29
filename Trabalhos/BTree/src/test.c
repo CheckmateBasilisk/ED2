@@ -3,6 +3,7 @@
 #include<utils.h>
 #include<files.h>
 #include<library.h>
+#include<bTree.h>
 
 #define ENTER 10
 
@@ -17,12 +18,14 @@ int main(int argc, char *argv[]){
     addBook(&lib, book);
     book = buildBook("Venus In Furs","B234567890123","Leopold von Sacher-Masoch", "1870");
     addBook(&lib, book);
+/*
     book = buildBook("Interview with the Vampire","C234567890123","Anne Rice", "1968");
     addBook(&lib, book);
+*/
 
     int op;
     do{
-        printf("operation:\n\t0. quit\n\t1. queryBook\n\t2. printAllBooks\n");
+        printf("operation:\n\t0. quit\n\t1. queryBook\n\t2. printAllBooks\n\t3. print a page in index\n");
         scanf(" %d", &op);
         if(op==1){
             char isbn[14];
@@ -30,6 +33,10 @@ int main(int argc, char *argv[]){
             printBook(queryBook(&lib,isbn));
         }else if(op==2){
             printAllBooks(&lib);
+        }else if(op==3){
+            int rrn;
+            scanf(" %d", &rrn);
+            printPage(readPage(&lib, rrn));
         }
     }while(op!= 0);
     printf("Exiting\n");
